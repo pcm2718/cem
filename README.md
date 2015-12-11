@@ -13,6 +13,14 @@ I initially considered modifying the extention to support these features, but I 
 
 cem is then intended for people who would like a way to compliment Chrome's strengths in web browsing with Emacs's proven strengths as an outliner and as a text editor in general. This makes Chrome a sort of pseudo-mode for Emacs, just with comparatively poor scripting and implemented as a monolith of C++.
 
+## Prerequisites
+
+cem requires the [chromi](https://chrome.google.com/webstore/detail/chromi/eeaebnaemaijhbdpnmfbdboenoomadbo?hl=en) extention for Chrome, as well as the associated [chromix-server and chromix client](http://chromix.smblott.org/) to be installed.
+
+## Installation
+
+A release tarball is forthcoming. Meanwhile, simply clone this repository (https://github.com/pcm2718/cem.git) to the place of your choosing, and add (load "/path/to/cem.el") to your .emacs file.
+
 ## Thanks
 
 A special thanks goes to the Chromi Chrome extention (https://github.com/smblott-github/chromi) and friends, without whom the project may never have gotten off the ground. Another special thanks goes to Tabs Outliner, which gave me the UI and unifying idea for the project. I wish their maintainers and developers the best of luck.
