@@ -19,7 +19,11 @@ cem requires the [chromi](https://chrome.google.com/webstore/detail/chromi/eeaeb
 
 ## Installation
 
-A release tarball is forthcoming. Meanwhile, simply clone this repository (https://github.com/pcm2718/cem.git) to the place of your choosing, and add (load "/path/to/cem.el") to your .emacs file.
+A release tarball is forthcoming. Meanwhile, simply clone [this](https://github.com/pcm2718/cem.git) repository to the place of your choosing, and add
+```elisp
+(load "/path/to/cem.el")
+```
+to your .emacs file.
 
 ## Thanks
 
