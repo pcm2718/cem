@@ -1,5 +1,15 @@
 ;;;; cem.el
 
+;;;; TODO Current plan:
+;;;;      1. Come up with a file format. Emacs is more stable than a
+;;;;      browser, and CEM runs browsers, not visa versa. Emacs is a modern Lisp Machine.
+;;;;      2. Bolt on rudimentry controls.
+;;;;      3. Get controls working backwards through the browser via plugins.
+;;;;      4. Get the display looking nice.
+;;;;      5. Fine tune things like incognito and windowing behavior.
+;;;;      6. ???
+;;;;      7. PROFIT!!!
+
 ;;;; TODO Figure out a good way to have the program interact with
 ;;;; chromix-server, then we should have a functioning prototype, sans
 ;;;; mode definition and keymap .
@@ -24,6 +34,17 @@
 ;;; Prerequisites
 
 (require 'json)
+
+;;; CEM session file interaction
+
+(defun cem-session-file-load (filename)
+  ;; TODO Hackneyed read approach, there's got to be a function for
+  ;; reading from a file.
+  (set 'cem-session (with-temp-buffer
+                      (insert-file-contents filename)
+                      (read current))))
+
+(defun cem-session-file-save ())
 
 ;;; CEM chromix-server interaction
 
@@ -191,14 +212,16 @@
 ;; TODO Use special-mode instead?
 (define-derived-mode cem-mode fundamental-mode "CEM"
   "cem-mode"
-  (define-key cem-mode-map "g" 'cem-outline)
-  (define-key cem-mode-map [return] 'cem-RET))
+  ;; (define-key cem-mode-map "g" 'cem-outline)
+  ;; (define-key cem-mode-map [return] 'cem-RET))
+  (set (make-local-variable 'cem-session) (read (current-buffer)))
+  (message (prin1-to-string cem-session)))
 
-(defun cem ()
-  "Start a CEM instance in a new buffer."
-  (interactive)
-  (cem-chromix-server-start)
-  (switch-to-buffer (get-buffer-create "*cem*"))
-  (cem-mode))
+;; (defun cem ()
+;;   "Start a CEM instance in a new buffer."
+;;   (interactive)
+;;   ;(cem-chromix-server-start)
+;;   (switch-to-buffer (get-buffer-create "*cem*"))
+;;   (cem-mode))
 
 (provide 'cem-mode)
