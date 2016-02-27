@@ -3,7 +3,7 @@
 ;;;; TODO Current plan:
 ;;;;      1. Come up with a file format. Emacs is more stable than a
 ;;;;      browser, and CEM runs browsers, not visa versa. Emacs is a modern Lisp Machine.
-;;;;      2. Bolt on rudimentry controls.
+;;;;      2. Bolt on rudimentry controls, including flatlining and resuscitation.
 ;;;;      3. Get controls working backwards through the browser via plugins.
 ;;;;      4. Get the display looking nice.
 ;;;;      5. Fine tune things like incognito and windowing behavior.
@@ -31,9 +31,69 @@
 ;;;; TODO Add double dash prefixes to internal symbols, update to
 ;;;; Emacs Lisp Coding Conventions.
 
+;;;; Special thanks to hexl.el , which was very instructive.
+
 ;;; Prerequisites
 
 (require 'json)
+
+;;; Stuff
+
+(defvar cem-mode-map
+  (let ((map (make-keymap)))
+    (define-key map "\C-x\C-s" 'cem-save-buffer)
+    map))
+
+;; TODO Use special-mode instead?
+;; (define-derived-mode cem-mode fundamental-mode "CEM"
+;;   "cem-mode"
+;;   ;; (define-key cem-mode-map "g" 'cem-outline)
+;;   ;; (define-key cem-mode-map [return] 'cem-RET))
+;;   (set (make-local-variable 'cem-session) (read (current-buffer)))
+;;   (message (prin1-to-string cem-session)))
+
+(define-derived-mode cem-mode fundamental-mode "CEM"
+  "cem-mode"
+  (set (make-local-variable 'cem-session) (read (current-buffer)))
+  (insert-string (prin1-to-string cem-session)))
+
+(defvar cem-in-save-buffer nil)
+
+(defun cem-save-buffer ()
+  "Save the session to the visited file if modified."
+  (interactive)
+  (unless cem-in-save-buffer 
+    ;; TODO Docs say this line is sketchy, will investigate.
+    (restore-buffer-modified-p
+     (if (buffer-modified-p)
+         (let ((buf (generate-new-buffer " cem"))
+               (name (buffer-name))
+               (start (point-min))
+               (end (point-max))
+               modified)
+           (with-current-buffer buf
+             (insert-buffer-substring name start end))
+           ;; TODO Print to buffer from cem-session ? Add custom
+           ;; human-friendly printing later.
+           (insert-string (prin1 cem-session))
+           ;; Prevent infinite recursion.
+           ;; TODO Why would this cause recursion, does save-buffer
+           ;; call cem-save-buffer ?
+           (let ((cem-in-save-buffer t))
+             (save-buffer))
+           (setq modified (buffer-modified-p))
+           (delete-region (point-min) (point-max))
+           (insert-buffer-substring buf start end)
+           (kill-buffer buf)
+           modified)
+       (message "(No changes need to be saved)")
+       nil))
+    ;; Return t to indicate we have saved.
+    t))
+
+(defun cem-cemify-buffer)
+
+
 
 ;;; CEM session file interaction
 
@@ -200,28 +260,5 @@
 
 
 ;;; CEM Mode Definition, Entry and Providence
-
-;; (defvar cem-mode-hook nil)
-
-;; (defvar wpdl-mode-map
-;;   (let ((map (make-sparse-keymap)))
-;;     (define-key map "RET" 'cem-RET)
-;;     map)
-;;   "Keymap for CEM major mode.")
-
-;; TODO Use special-mode instead?
-(define-derived-mode cem-mode fundamental-mode "CEM"
-  "cem-mode"
-  ;; (define-key cem-mode-map "g" 'cem-outline)
-  ;; (define-key cem-mode-map [return] 'cem-RET))
-  (set (make-local-variable 'cem-session) (read (current-buffer)))
-  (message (prin1-to-string cem-session)))
-
-;; (defun cem ()
-;;   "Start a CEM instance in a new buffer."
-;;   (interactive)
-;;   ;(cem-chromix-server-start)
-;;   (switch-to-buffer (get-buffer-create "*cem*"))
-;;   (cem-mode))
 
 (provide 'cem-mode)
