@@ -54,8 +54,20 @@
 
 (define-derived-mode cem-mode fundamental-mode "CEM"
   "cem-mode"
+  ;; (set (make-local-variable 'cem-session) (read (current-buffer)))
+  ;; (insert-string (prin1-to-string cem-session)))
+  (cem-cemify-buffer))
+
+(defun cem-cemify-buffer ()
+  (interactive)
   (set (make-local-variable 'cem-session) (read (current-buffer)))
+  (erase-buffer)
+  (cem-session-print cem-session)
   (insert-string (prin1-to-string cem-session)))
+
+;; (defun cem-session-print (l)
+;;   (dolist (e l l)
+;;     (cond ((eq :browser e) (print ))))
 
 (defvar cem-in-save-buffer nil)
 
@@ -75,7 +87,8 @@
              (insert-buffer-substring name start end))
            ;; TODO Print to buffer from cem-session ? Add custom
            ;; human-friendly printing later.
-           (insert-string (prin1 cem-session))
+           ;(insert-string (prin1 cem-session))
+           (cem-decemify-buffer)
            ;; Prevent infinite recursion.
            ;; TODO Why would this cause recursion, does save-buffer
            ;; call cem-save-buffer ?
@@ -91,7 +104,8 @@
     ;; Return t to indicate we have saved.
     t))
 
-(defun cem-cemify-buffer)
+(defun cem-cemify-buffer ()
+  )
 
 
 
