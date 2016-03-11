@@ -39,6 +39,11 @@
 
 ;;; Stuff
 
+(defvar cem-sample-session '(:group (:name "Bob")
+                                    (:elements (:window (:browser 'chrome)
+                                                        (:elements (:tab (:url "https://xkcd.com"))
+                                                                   (:tab (:url "https://loper-os.com")))))))
+
 (defvar cem-mode-map
   (let ((map (make-keymap)))
     (define-key map "\C-x\C-s" 'cem-save-buffer)
@@ -62,8 +67,72 @@
   (interactive)
   (set (make-local-variable 'cem-session) (read (current-buffer)))
   (erase-buffer)
-  (cem-session-print cem-session)
-  (insert-string (prin1-to-string cem-session)))
+  (insert (prin1-to-string cem-session))
+  (insert "\n")
+  (cem-session-insert)
+  )
+
+(defun cem-session-insert ()
+  (cem-item-insert cem-session 0))
+
+;; (defmacro cem-keyword-case (x &rest args)
+;;   `(let ((gensym)))
+;;   (let ((q x)
+;;         (y ()))
+;;     `(cond ,@(dolist (z args y)
+;;                (setq y (cons `((eq (car z) ))(append  (list (list ))))))))
+
+;; (append '(1 2) '(2))
+
+(defun cem-item-insert (x level)
+  (let ((carx (car x)))
+    (cond ((eq :group carx) (cem-group-insert (cdr x) level))
+          ((eq :window carx) (cem-window-insert (cdr x) level))
+          ((eq :tab carx) (cem-tab-insert (cdr x) level)))
+        ;; TODO Add error cond.
+          ))
+
+;; (defun cem-group-insert (x level)
+;;   (cem-assoc-print :name x)
+;;   ;;(insert (cadr (assoc :name x)))
+;;   (dolist (y (cdr (assoc :elements x)))
+;;     (cem-item-print y)))
+
+;; (defun cem-browser-insert (x level)
+;;   ;;  (insert ))
+;;   nil)
+
+;; (defun cem-tab-print (x level)
+;;   (dotimes (i level) (insert "  ")) (cem-assoc-print :url x))
+
+(defmacro cem-insert-gen (xsym levelsym &rest body)
+  `(lambda (,xsym ,levelsym)
+     ,@body
+     ;; TODO Gensym probably needed for element.
+     (dolist (element (cdr (assoc :elements ,xsym)))
+       (cem-item-insert element (+ 1 ,levelsym)))))
+
+(defalias 'cem-group-insert
+  (cem-insert-gen x l
+                  (cem-indent-insert l) (cem-assoc-insert :name x) (insert "\n")))
+
+(defalias 'cem-window-insert
+  (cem-insert-gen x l
+                  ))
+
+(defalias 'cem-tab-insert
+  (cem-insert-gen x l
+                  (cem-indent-insert l) (cem-assoc-insert :url x) (insert "\n")))
+
+(defun cem-indent-insert (l)
+  (dotimes (i l) (insert "  ")))
+                
+(defun cem-assoc-insert (key list)
+  (insert (cadr (assoc key list)))
+  (dolist (y (cdr (assoc :elements x)))
+    (cem-item-insert y)))
+
+(cem-item-insert cem-sample-session 0)
 
 ;; (defun cem-session-print (l)
 ;;   (dolist (e l l)
