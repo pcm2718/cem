@@ -109,7 +109,27 @@
 
 ;; TODO Add cem-mode-exit ?
 
+;; (defun cem-item-at-point ()
+;;   "Return the cem item at point."
+;;   (interactive)
+;;   (if (eq 0 (cem-level-at-point))
+;;       cem-session
+;;     (let ((parent (cem-parent-at-point))))
+;;     (cons (cem-)())
+;;       (cem-level-at-point))
+;;   (cem-level-at-point)
+;;   )
 
+;; (defun cem-parent-at-point ()
+;;   "Return the parent of the cem item at point."
+;;   (interactive)
+;;   )
+
+;; (defun cem-level-at-point ()
+;;   "Return the depth of the cem item at point.")
+
+;; (defun cem-element-index-at-point ()
+;;   "Return the index of the cem item at point (based on counting to the parent.)")
 
 (defvar cem-mode-map
   (let ((map (make-keymap)))
@@ -134,32 +154,36 @@
 ;;                (setq y (cons `((eq (car z) ))(append  (list (list ))))))
 
 (defun cem-item-insert (x level)
-  (let ((y (car x))
-        (z (cdr x)))
-    (cond ((eq :group y) (cem-group-insert z level))
-          ((eq :window y) (cem-window-insert z level))
-          ((eq :tab y) (cem-tab-insert z level)))
+  (let ((y (car x)))
+    (cond ((eq :group y) (cem-group-insert x level))
+          ((eq :window y) (cem-window-insert x level))
+          ((eq :tab y) (cem-tab-insert x level)))
         ;; TODO Add error cond.
           ))
 
 (defmacro cem-insert-gen (xsym levelsym &rest body)
   `(lambda (,xsym ,levelsym)
+     ;; TODO Add code to record point at beginning of insert, for
+     ;; spreading the cem-item property over multi-line inserts.
      ,@body
+     ;; TODO Questionable.
+     (insert "\n")
+     (put-text-property (line-beginning-position 0) (+ 1 (line-end-position 0)) 'cem-item ,xsym)
      ;; TODO Gensym probably needed for element.
-     (dolist (element (cdr (assoc :elements ,xsym)))
+     (dolist (element (cdr (assoc :elements (cdr ,xsym))))
        (cem-item-insert element (+ 1 ,levelsym)))))
 
 (defalias 'cem-group-insert
   (cem-insert-gen x l
-                  (cem-indent-insert l) (cem-assoc-insert :name x) (insert "\n")))
+                  (cem-indent-insert l) (cem-assoc-insert :name (cdr x))))
 
 (defalias 'cem-window-insert
   (cem-insert-gen x l
-                  (cem-indent-insert l) (insert "\n")))
+                  (cem-indent-insert l)))
 
 (defalias 'cem-tab-insert
   (cem-insert-gen x l
-                  (cem-indent-insert l) (cem-assoc-insert :url x) (insert "\n")))
+                  (cem-indent-insert l) (cem-assoc-insert :url (cdr x))))
 
 (defun cem-indent-insert (l)
   (dotimes (i l) (insert "  ")))
@@ -168,12 +192,6 @@
   (insert (cadr (assoc key list))))
 
 ;; (cem-item-insert cem-sample-session 0)
-
-
-
-
-(defun cem-cemify-buffer ()
-  )
 
 
 
